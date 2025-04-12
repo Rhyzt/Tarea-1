@@ -35,6 +35,7 @@ void registrarTicket(int ID, char *descripcion, Cola *arrayColas);
 bool asignarPrioridad(int ID, char *prio, Cola *arrayColas);
 void mostrarCola(Cola *arrayColas);
 void procesarTicket(Cola *arrayColas);
+void esperarAccion();
 Busqueda *buscarID(int ID, Cola *arrayColas);
 
 
@@ -72,6 +73,13 @@ void vaciarColas(Cola *arrayColas) { //Vacia las colas, usado para cuando se ter
     }
 }
 
+void esperarAccion() {
+    puts("Presione enter para continuar");
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+    puts(""); 
+}
+
 void menuOpciones(Cola *arrayColas) { //Tomara la respuesta del usuario y ejecutara la instruccion pertinente
     int opcion;
     scanf("%d",&opcion); //Se asume que el usuario no comete errores
@@ -99,7 +107,7 @@ void menuOpciones(Cola *arrayColas) { //Tomara la respuesta del usuario y ejecut
             scanf("%d", &IDTemp);
             getchar();
             puts("");
-            printf("Ingrese la prioridad deseada: "); //Obtener informacion del ticket
+            printf("Seleccione el nuevo nivel de prioridad (Alto, Medio, Bajo): "); //Obtener informacion del ticket
             fgets(prio, sizeof(prio), stdin);
             prio[strcspn(prio, "\n")] = '\0';
             for (int i = 0 ; prio[i] != '\0' ; i++)
@@ -109,10 +117,12 @@ void menuOpciones(Cola *arrayColas) { //Tomara la respuesta del usuario y ejecut
         }
         case 3: { //Mostrar lista
             mostrarCola(arrayColas);
+            esperarAccion();
             break;
         }
         case 4: { //Procesar ticket
             procesarTicket(arrayColas);
+            esperarAccion();
             break;
         }
         case 5: { //Buscar ticket
@@ -127,6 +137,7 @@ void menuOpciones(Cola *arrayColas) { //Tomara la respuesta del usuario y ejecut
                 puts("Ticket no Encontrado");
                 puts("");
             free(search);
+            esperarAccion();
             break;
         }
         case 6: //Fin del programa
@@ -248,6 +259,9 @@ bool asignarPrioridad(int IDBuscada, char *prio, Cola *arrayColas) {
         int IDtop = actual -> ID;
         enqueue(&arrayColas[nuevaPrioridad], informacion -> ticketEncontrado); // Se agrega el ticket a la cola correspondiente
         informacion -> ticketEncontrado -> prioridad = nuevaPrioridad; // Se cambia la prioridad del struct del ticket
+        char *hora = obtenerHoraActual();
+        strcpy(informacion -> ticketEncontrado -> horaReg,hora); // Se cambia la hora del ticket cambiado de prioridad
+        free(hora);
         if (actual -> ID == IDBuscada) { // Se revisa si el primer dato de la cola es el buscado, ya que solo bastaria con hacer una instruccion
             dequeue(&arrayColas[informacion -> prioridad]);
         }
