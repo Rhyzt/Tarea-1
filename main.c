@@ -40,7 +40,6 @@ int main() {
     Cola *arrayColas = inicializarColas(); //Crea las diferentes colas de prioridad
     while(1) {
         mostrarMenu(); //Muestra las diferentes opciones al usuario
-        getchar();
         menuOpciones(arrayColas); //Verifica la opcion ingresada
     }
 }
@@ -56,7 +55,7 @@ void mostrarMenu() { //Muestra todas las opciones a elegir al usuario
     puts("5) Buscar Por ID");
     puts("6) Salir");
     puts("--------------------------------------------------");
-    puts("Seleccione una opción: ");
+    puts("Seleccione una opcion: ");
 }
 
 void menuOpciones(Cola *arrayColas) { //Tomara la respuesta del usuario y ejecutara la instruccion pertinente
@@ -85,10 +84,8 @@ void menuOpciones(Cola *arrayColas) { //Tomara la respuesta del usuario y ejecut
             puts("");
             printf("Ingrese la prioridad deseada: "); //Obtener informacion del ticket
             fgets(prio, sizeof(prio), stdin);
-            prio[strcspn(prio, "\n")] = '\0';
             for (int i = 0 ; prio[i] != '\0' ; i++)
                 prio[i] = toupper(prio[i]);
-
             asignarPrioridad(IDTemp, prio, arrayColas);
             break;
         }
@@ -172,6 +169,7 @@ Busqueda *buscarID(int IDBuscada, Cola *arrayColas) {
         exit(EXIT_FAILURE);
     }
     informacion -> esNulo = true; //Definira si existe el valor en las colas o no
+    informacion -> ticketEncontrado = NULL;
     for(int i = 0; i < 3 ; i++) { // Se recorren las 3 colas de prioridad
         Ticket *actual = top(&arrayColas[i]); 
         if (actual != NULL) {  // Revisa si la cola tiene elementos
@@ -180,7 +178,7 @@ Busqueda *buscarID(int IDBuscada, Cola *arrayColas) {
                 if (actual -> ID == IDBuscada) { // Si el ticket deseado es encontrado, se cambian los valores del struct informacion
                     informacion -> prioridad = i;
                     informacion -> ticketEncontrado = actual;
-                    informacion -> esNulo = false; 
+                    informacion -> esNulo = false;
                 } // No se retorna nada aqui ya que se tiene que volver al estado original de la cola
                 enqueue(&arrayColas[i], actual); // enqueue y dequeue usados para recorrer la cola
                 dequeue(&arrayColas[i]);
@@ -205,6 +203,7 @@ bool asignarPrioridad(int IDBuscada, char *prio, Cola *arrayColas) {
             else
                 nuevaPrioridad = PRIO_ALTA;
         }
+
         if (informacion -> prioridad == nuevaPrioridad) {
             free(informacion); //Se libera la memoria de la busqueda
             return true; //Si ya pertenece a esta prioridad, la funcion no hace nada
