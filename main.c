@@ -28,7 +28,9 @@ typedef struct Busqueda { //Struct Para busqueda de tickets
 void mostrarMenu();
 Cola *inicializarColas();
 void menuOpciones(Cola *arrayColas);
+void printearTicket(Ticket *ticket);
 char *obtenerHoraActual();
+void vaciarColas(Cola *arrayColas);
 void registrarTicket(int ID, char *descripcion, Cola *arrayColas);
 bool asignarPrioridad(int ID, char *prio, Cola *arrayColas);
 void mostrarCola(Cola *arrayColas);
@@ -37,7 +39,7 @@ Busqueda *buscarID(int ID, Cola *arrayColas);
 
 
 int main() {
-    freopen("entrada.txt", "r", stdin);
+    //freopen("entrada.txt", "r", stdin); //Usado para debuggear
     Cola *arrayColas = inicializarColas(); //Crea las diferentes colas de prioridad
     while(1) {
         mostrarMenu(); //Muestra las diferentes opciones al usuario
@@ -59,6 +61,17 @@ void mostrarMenu() { //Muestra todas las opciones a elegir al usuario
     puts("Seleccione una opcion: ");
 }
 
+void vaciarColas(Cola *arrayColas) { //Vacia las colas, usado para cuando se termina el programa
+    for (int i = 0 ; i < 3 ; i++) { //Recorre el array de Colas
+        Ticket *actual = top(&arrayColas[i]);
+        while (actual != NULL) { // Recorre las colas, haciendo dequeue y free a cada elemento
+            dequeue(&arrayColas[i]);
+            free(actual);
+            actual = top(&arrayColas[i]);
+        }
+    }
+}
+
 void menuOpciones(Cola *arrayColas) { //Tomara la respuesta del usuario y ejecutara la instruccion pertinente
     int opcion;
     scanf("%d",&opcion); //Se asume que el usuario no comete errores
@@ -73,7 +86,10 @@ void menuOpciones(Cola *arrayColas) { //Tomara la respuesta del usuario y ejecut
             puts("");
             printf("Describa su problema: ");
             fgets(descTemp, sizeof(descTemp), stdin);
+            descTemp[strcspn(descTemp, "\n")] = '\0';
+
             registrarTicket(IDTemp, descTemp, arrayColas); //Registra los datos ingresados en un ticket con prioridad Baja
+            puts("");
             break;
         }
         case 2: { //Asignar Prioridad
@@ -85,6 +101,7 @@ void menuOpciones(Cola *arrayColas) { //Tomara la respuesta del usuario y ejecut
             puts("");
             printf("Ingrese la prioridad deseada: "); //Obtener informacion del ticket
             fgets(prio, sizeof(prio), stdin);
+            prio[strcspn(prio, "\n")] = '\0';
             for (int i = 0 ; prio[i] != '\0' ; i++)
                 prio[i] = toupper(prio[i]);
             asignarPrioridad(IDTemp, prio, arrayColas);
@@ -103,10 +120,17 @@ void menuOpciones(Cola *arrayColas) { //Tomara la respuesta del usuario y ejecut
             printf("Ingrese la ID del ticket: "); //Obtener informacion del ticket
             scanf("%d", &IDTemp);
             getchar();
-            buscarID(IDTemp, arrayColas);
+            Busqueda *search = buscarID(IDTemp, arrayColas);
+            if (search -> ticketEncontrado)
+                printearTicket(search -> ticketEncontrado);
+            else
+                puts("Ticket no Encontrado");
+                puts("");
+            free(search);
             break;
         }
         case 6: //Fin del programa
+            vaciarColas(arrayColas);
             free(arrayColas);
             exit(EXIT_SUCCESS);
         default: { //En caso de que el numero ingresado no sea valido
@@ -128,6 +152,18 @@ Cola *inicializarColas() {
     return arrayColas;
 }
 
+void printearTicket(Ticket *ticket) {
+    printf("======= Ticket #%d =======\n", ticket->ID); //Printea la informacion de un ticket (ID, descripcion, hora, prioridad)
+    printf("Descripcion: %s\n", ticket -> descripcion);
+    printf("Hora: %s\n", ticket->horaReg);
+    printf("Prioridad: ");
+    if (ticket -> prioridad == 0) puts("Alta");
+    else {
+        if (ticket -> prioridad == 1) puts("Media");
+        else puts("Baja");
+    }
+}
+
 char *obtenerHoraActual() { //Retorna la Hora local, en formato HH:MM:SS
     time_t hora;
     struct tm *horaPtr; //Variables usadas para obtener la hora
@@ -141,7 +177,7 @@ char *obtenerHoraActual() { //Retorna la Hora local, en formato HH:MM:SS
         exit(EXIT_FAILURE);
     }
     horaPtr = localtime(&hora); //Se obtiene la hora local, en formato completo
-    strftime(horaStr, sizeof(horaStr),"%T", horaPtr); //Se formatea la hora con %T (HH:MM:SS)
+    strftime(horaStr, 9,"%H:%M:%S", horaPtr); //Se formatea la hora (HH:MM:SS) y se guarda en horaStr como string
     
     return(horaStr); 
 }
@@ -230,23 +266,11 @@ bool asignarPrioridad(int IDBuscada, char *prio, Cola *arrayColas) {
     return false; // Si no existe el ticket, no es necesario hacer la comprobacion dentro de colas ya que directamente no se podria encontrar
 }
 
-void printearTicket(Ticket *ticket) {
-    printf("======= Ticket #%d =======\n", ticket->ID);
-    printf("Descripcion: %s\n", ticket -> descripcion);
-    printf("Hora: %s\n", ticket->horaReg);
-    printf("Prioridad: ");
-    if (ticket -> prioridad == 0) puts("Alta");
-    else {
-        if (ticket -> prioridad == 1) puts("Media");
-        else puts("Baja");
-    }
-}
-
 void mostrarCola(Cola *arrayColas) {
     const char *prioridades[] = {"Alta", "Media", "Baja"};
     for(int i = 0; i < 3 ; i++) { // Se recorren las 3 colas de prioridad
         if (top(&arrayColas[i]) != NULL) {
-            printf("---- Prioridad %s ----\n", prioridades[i]);
+            printf("---- Prioridad %s ----\n", prioridades[i]);// Separador por prioridad
             Ticket *actual = top(&arrayColas[i]);
             int IDtop = actual -> ID;
             do {
@@ -263,8 +287,8 @@ void mostrarCola(Cola *arrayColas) {
 
 void procesarTicket(Cola *arrayColas) {
     Ticket *actual;
-    if ((actual = top(&arrayColas[PRIO_ALTA])) != NULL) {
-        printearTicket(actual);
+    if ((actual = top(&arrayColas[PRIO_ALTA])) != NULL) { // Revisar cada cola desde la alta a la baja hasta encontrar alguna que tenga un ticket
+        printearTicket(actual); // Se printea el ticket y luego se borra 
         dequeue(&arrayColas[PRIO_ALTA]);
         free(actual);
     }
@@ -281,9 +305,9 @@ void procesarTicket(Cola *arrayColas) {
                 free(actual);
             }
             else {
-                puts("No hay tickets pendientes");
+                puts("No hay tickets pendientes"); // Si no se encontraron tickets, arroja un mensaje
+                puts("");
             }
         }
     }
 }
-
