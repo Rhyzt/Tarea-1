@@ -49,6 +49,7 @@ Asumiendo que el usuario nunca comete errores y entrega datos pertinentes a la a
 ### A mejorar:
 
 - Mejorar el formato del texto mostrado en pantalla.
+- Aceptar todo tipo de inputs, aceptando solo los que sean validos
 
 ## Ejemplo de uso
 
