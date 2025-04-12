@@ -44,7 +44,6 @@ void dequeue(Cola *queue) {
     queue -> head = aux -> next;
     if (queue -> head == NULL)
         queue -> tail = NULL;
-    free(aux->data);
     free(aux);
 }
 

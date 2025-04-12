@@ -37,6 +37,7 @@ Busqueda *buscarID(int ID, Cola *arrayColas);
 
 
 int main() {
+    freopen("entrada.txt", "r", stdin);
     Cola *arrayColas = inicializarColas(); //Crea las diferentes colas de prioridad
     while(1) {
         mostrarMenu(); //Muestra las diferentes opciones al usuario
@@ -122,8 +123,7 @@ Cola *inicializarColas() {
         exit(EXIT_FAILURE);
     }
     for (int i = 0 ; i < 3 ; i++) { //Se inicializan las 3 colas de prioridad
-        arrayColas[i].head = NULL;
-        arrayColas[i].tail = NULL;
+        arrayColas[i] = *createQueue();
     }
     return arrayColas;
 }
@@ -171,7 +171,7 @@ Busqueda *buscarID(int IDBuscada, Cola *arrayColas) {
     informacion -> esNulo = true; //Definira si existe el valor en las colas o no
     informacion -> ticketEncontrado = NULL;
     for(int i = 0; i < 3 ; i++) { // Se recorren las 3 colas de prioridad
-        Ticket *actual = top(&arrayColas[i]); 
+        Ticket *actual = top(&arrayColas[i]);
         if (actual != NULL) {  // Revisa si la cola tiene elementos
             IDtop = actual -> ID;
             do {
