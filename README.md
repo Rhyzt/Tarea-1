@@ -49,6 +49,7 @@ Asumiendo que el usuario nunca comete errores y entrega datos pertinentes a la a
 ### A mejorar:
 
 - Mejorar el formato del texto mostrado en pantalla.
+- Aceptar todo tipo de inputs, aceptando solo los que sean validos.
 
 ## Ejemplo de uso
 
@@ -90,3 +91,19 @@ La lista muestra el ticket con ID 1001 en la posicion mas alta, indicando que es
 Opción seleccionada: 4) Procesar siguiente Ticket
 ```
 El sistema muestra la informacion del ticket con mayor prioridad y lo elimina de la lista.
+
+**Opcion 5: Buscar un ticket por su ID**
+
+```
+Opción seleccionada: 5) Buscar Por ID
+```
+El sistema muestra la informacion del ticket con la ID proporcionada, sin alterar el orden de los otros tickets.
+
+**Opcion 6: Salir del programa**
+
+```
+Opción seleccionada: 6) Salir
+```
+El programa limpia todo lo que tenga almacenado en ese momento y luego se cierra.
+
+

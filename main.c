@@ -39,10 +39,10 @@ void esperarAccion();
 Busqueda *buscarID(int ID, Cola *arrayColas);
 
 
-int main() {
-    //freopen("entrada.txt", "r", stdin); //Usado para debuggear
+void main() {
+    freopen("entrada.txt", "r", stdin); //Usado para debuggear
     Cola *arrayColas = inicializarColas(); //Crea las diferentes colas de prioridad
-    while(1) {
+    while(1) { //Usado para que el programa no termine, ya que este debe ser cerrado usando una opcion la que dara un exit
         mostrarMenu(); //Muestra las diferentes opciones al usuario
         menuOpciones(arrayColas); //Verifica la opcion ingresada
     }
@@ -145,10 +145,12 @@ void menuOpciones(Cola *arrayColas) { //Tomara la respuesta del usuario y ejecut
             free(arrayColas);
             exit(EXIT_SUCCESS);
         default: { //En caso de que el numero ingresado no sea valido
-            puts("Ingresa una opcion Valida"); 
+            puts("Ingresa una opcion Valida");
+            esperarAccion();
             break;
         }
     }
+    puts("");
 }
 
 Cola *inicializarColas() {
@@ -201,9 +203,9 @@ void registrarTicket(int codigo, char *desc, Cola *arrayColas) {
     }
     nuevoTicket -> ID = codigo; //Se rellena el nuevo ticket
     strcpy(nuevoTicket -> descripcion, desc);
-    char *hora = obtenerHoraActual();
-    strcpy(nuevoTicket -> horaReg, hora); //Obtiene la hora actual en formato HH:MM:SS
-    free(hora);
+    char *hora = obtenerHoraActual(); //Obtiene la hora actual en formato HH:MM:SS 
+    strcpy(nuevoTicket -> horaReg, hora); // La hora es copiada dentro del ticket
+    free(hora); //Libera la memoria usada despues de ser copiada
     nuevoTicket -> prioridad = PRIO_BAJA; //Se asigna la prioridad por defecto (Prioridad Baja)
     enqueue(&arrayColas[PRIO_BAJA], nuevoTicket); //Se encola en la cola por defecto
 }
@@ -277,13 +279,17 @@ bool asignarPrioridad(int IDBuscada, char *prio, Cola *arrayColas) {
         return true; //Se hizo el cambio con exito
     }
     free(informacion); //Se libera la memoria de la busqueda
+    puts("No existe un ticket con esta ID"); //Se avisa que no se encontro un ticket
+    esperarAccion();
     return false; // Si no existe el ticket, no es necesario hacer la comprobacion dentro de colas ya que directamente no se podria encontrar
 }
 
 void mostrarCola(Cola *arrayColas) {
     const char *prioridades[] = {"Alta", "Media", "Baja"};
+    bool flag = false; // Para revisar si se encontro al menos una lista con tickets
     for(int i = 0; i < 3 ; i++) { // Se recorren las 3 colas de prioridad
         if (top(&arrayColas[i]) != NULL) {
+            flag = true; // Se encontro al menos un ticket
             printf("---- Prioridad %s ----\n", prioridades[i]);// Separador por prioridad
             Ticket *actual = top(&arrayColas[i]);
             int IDtop = actual -> ID;
@@ -297,6 +303,8 @@ void mostrarCola(Cola *arrayColas) {
             puts("");
         }
     }
+    if (!flag)
+        puts("No se encontro ningun ticket");
 }
 
 void procesarTicket(Cola *arrayColas) {
