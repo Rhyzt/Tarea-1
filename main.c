@@ -14,7 +14,7 @@
 typedef struct Ticket { //Struct para guardar los datos de los tickets 
     int ID;
     char horaReg[9];
-    char descripcion[50];
+    char descripcion[100];
     int prioridad;
 } Ticket;
 
@@ -28,6 +28,7 @@ typedef struct Busqueda { //Struct Para busqueda de tickets
 void mostrarMenu();
 Cola *inicializarColas();
 void menuOpciones(Cola *arrayColas);
+void verificarOpcion(int *num);
 void printearTicket(Ticket *ticket);
 char *obtenerHoraActual();
 void vaciarColas(Cola *arrayColas);
@@ -40,7 +41,7 @@ Busqueda *buscarID(int ID, Cola *arrayColas);
 
 
 void main() {
-    freopen("entrada.txt", "r", stdin); //Usado para debuggear
+    //freopen("entrada.txt", "r", stdin); //Usado para debuggear
     Cola *arrayColas = inicializarColas(); //Crea las diferentes colas de prioridad
     while(1) { //Usado para que el programa no termine, ya que este debe ser cerrado usando una opcion la que dara un exit
         mostrarMenu(); //Muestra las diferentes opciones al usuario
@@ -80,17 +81,66 @@ void esperarAccion() {
     puts(""); 
 }
 
+void verificarOpcion(int *num) {
+    char str[3];
+    while (1) {
+        fgets(str, 3, stdin);
+        if (str[strlen(str) - 1] != '\n') { //Se revisa si el usuario escribio mas de 2 caracteres
+            int ch;
+            while ((ch = getchar()) != '\n' && ch != EOF); // Limpiar stdin para leer correctamente el proximo input
+        }
+        else {
+            if (isdigit(str[0]) && str[1] == '\n') { //En caso de que el numero ingresado no sea valido
+                *num = str[0] - '0';
+                if (*num > 0 && *num < 7) break;
+            }
+        }
+        puts("Ingresa una opcion Valida");
+        esperarAccion();
+    }
+}
+
+int verificarNumero() {
+    char str[11];
+    while (1) {
+        fgets(str, 11, stdin);
+        if (str[strlen(str) - 1] != '\n') { //Se revisa si el usuario escribio mas de 9 caracteres
+            int ch;
+            while ((ch = getchar()) != '\n' && ch != EOF); // Limpiar stdin para leer correctamente el proximo input
+            puts("Solo se aceptan hasta un maximo de 9 digitos");
+        }
+        str[strcspn(str, "\n")] = '\0'; // Cambia el salto de linea por el caracter nulo
+        bool flag = true;
+        if (strlen(str) == 0) { // Revisa si la cadena esta vacia
+            flag = false;
+            puts("No se ingreso nada");
+        }
+        else {
+            for (int i = 0 ; str[i] != '\0' ; i++) { //Revisa si la cadena ingresada son solamente numeros
+                if (!isdigit(str[i])) {
+                    puts("Solo se aceptan numeros");
+                    flag = false;
+                    break;
+                }
+            }
+        }
+        if (flag) {
+            long num = strtol(str, NULL, 10);
+            return (int)num;
+        }
+
+    }
+}
+
 void menuOpciones(Cola *arrayColas) { //Tomara la respuesta del usuario y ejecutara la instruccion pertinente
-    int opcion;
-    scanf("%d",&opcion); //Se asume que el usuario no comete errores
-    getchar();
-    switch (opcion) { //Se usa switch para separar segun el valor ingresado
+    int num;
+    verificarOpcion(&num); //Verifica que la opcion ingresada sea valida
+    switch (num) { //Se usa switch para separar segun el valor ingresado
         case 1: { //Registrar Ticket
             int IDTemp;
-            char descTemp[30];
+            char descTemp[100];
             printf("Ingrese la ID del ticket: "); //Obtener informacion del ticket
-            scanf("%d", &IDTemp);
-            getchar(); //Limpiar \n
+            IDTemp = verificarNumero();
             puts("");
             printf("Describa su problema: ");
             fgets(descTemp, sizeof(descTemp), stdin);
@@ -104,8 +154,7 @@ void menuOpciones(Cola *arrayColas) { //Tomara la respuesta del usuario y ejecut
             int IDTemp;
             char prio[10];
             printf("Ingrese la ID del ticket: "); //Obtener informacion del ticket
-            scanf("%d", &IDTemp);
-            getchar();
+            IDTemp = verificarNumero();
             puts("");
             printf("Seleccione el nuevo nivel de prioridad (Alto, Medio, Bajo): "); //Obtener informacion del ticket
             fgets(prio, sizeof(prio), stdin);
@@ -128,8 +177,7 @@ void menuOpciones(Cola *arrayColas) { //Tomara la respuesta del usuario y ejecut
         case 5: { //Buscar ticket
             int IDTemp;
             printf("Ingrese la ID del ticket: "); //Obtener informacion del ticket
-            scanf("%d", &IDTemp);
-            getchar();
+            IDTemp = verificarNumero();
             Busqueda *search = buscarID(IDTemp, arrayColas);
             if (search -> ticketEncontrado)
                 printearTicket(search -> ticketEncontrado);
@@ -140,14 +188,10 @@ void menuOpciones(Cola *arrayColas) { //Tomara la respuesta del usuario y ejecut
             esperarAccion();
             break;
         }
-        case 6: //Fin del programa
+        case 6: { //Fin del programa
             vaciarColas(arrayColas);
             free(arrayColas);
             exit(EXIT_SUCCESS);
-        default: { //En caso de que el numero ingresado no sea valido
-            puts("Ingresa una opcion Valida");
-            esperarAccion();
-            break;
         }
     }
     puts("");
@@ -249,8 +293,16 @@ bool asignarPrioridad(int IDBuscada, char *prio, Cola *arrayColas) {
         else { 
             if (strcmp(prio, "MEDIO") == 0)
                 nuevaPrioridad = PRIO_MEDIA;
-            else
-                nuevaPrioridad = PRIO_ALTA;
+            else {
+                if (strcmp(prio, "ALTO") == 0)
+                    nuevaPrioridad = PRIO_ALTA;
+                else {
+                    puts("No se ingreso una prioridad valida.");
+                    free(informacion);
+                    esperarAccion();
+                    return false;
+                }
+            }
         }
 
         if (informacion -> prioridad == nuevaPrioridad) {

@@ -49,11 +49,10 @@ Asumiendo que el usuario nunca comete errores y entrega datos pertinentes a la a
 ### A mejorar:
 
 - Mejorar el formato del texto mostrado en pantalla.
-<<<<<<< HEAD
 - Aceptar todo tipo de inputs, aceptando solo los que sean validos.
+- Manejar situacion en la que se ingrese un ticket con la misma ID de alguno ya previamente agregado.
 =======
-- Aceptar todo tipo de inputs, aceptando solo los que sean validos
->>>>>>> 0c159a373ac9f3f98af5990cce72592a4d3128fb
+
 
 ## Ejemplo de uso
 
@@ -113,4 +112,4 @@ El programa limpia todo lo que tenga almacenado en ese momento y luego se cierra
 
 
 =======
->>>>>>> 0c159a373ac9f3f98af5990cce72592a4d3128fb
+
